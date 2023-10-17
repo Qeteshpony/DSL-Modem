@@ -1,5 +1,6 @@
 """
-Original from https://github.com/DFRobot/DFRobot_RGB1602_RaspberryPi/blob/master/python/rgb1602.py
+Original published under the GNU Lesser General Public License at
+https://github.com/DFRobot/DFRobot_RGB1602_RaspberryPi/blob/master/python/rgb1602.py
 Massively modified by Qetesh to make it work for this project
 """
 
