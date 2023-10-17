@@ -1,0 +1,16 @@
+[Unit]
+Description=modemcontroller
+After=network.target
+
+[Service]
+Environment=PYTHONUNBUFFERED=1
+ExecStart=/usr/bin/env python3 /home/dsl-modem/modem.py
+Restart=on-failure
+RuntimeDirectory=dsl-modem
+RuntimeDirectoryPreserve=yes
+User=dsl-modem
+Group=dsl-modem
+SyslogIdentifier=dsl-modem
+
+[Install]
+WantedBy=default.target
