@@ -44,6 +44,9 @@ class Client:
         self.connected = False
         logging.info("MQTT disconnected")
 
+    def is_connected(self) -> bool:
+        return self.mqtt.is_connected()
+
     def publish(self, topic: str, message: str, retain: bool = False, fulltopic: bool = False):
         if self.connected:
             if not fulltopic:

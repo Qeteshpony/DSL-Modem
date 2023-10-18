@@ -213,6 +213,9 @@ class DSLModem:
 
     def requestModemData(self) -> None:
         logging.debug("Requesting Modem Data...")
+        if not self.mqtt.is_connected():
+            self.mqtt.connect()
+
         self.nextDataRequest = time.time() + self.DataRequestTimer
         self.serial.write(COMMAND_UPTIME)
         self.serial.write(COMMAND_ETH_DATA)
