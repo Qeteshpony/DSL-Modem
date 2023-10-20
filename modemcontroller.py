@@ -95,7 +95,7 @@ class DSLModem:
             if self.lastAvailabilityCheck + 5 < time.time():
                 logging.debug("Send Availability Check...")
                 self.lastAvailabilityCheck = time.time()
-                self.serial.write(b"\n")
+                self.serial.write(b"\n")  # Send newline to activate prompt
 
         line = ""
         try:
@@ -127,6 +127,14 @@ class DSLModem:
                         logging.info("Requesting Software Version from modem")
                         self.serial.write(COMMAND_GET_SW_VERSION)
                 line = line[len("root@SpeedportW925V:/#"):-1].strip()
+
+        if line.startswith(">"):
+            # we're stuck in a prompt we dont want to be in. Try to recover...
+            logging.error("Got '>' prompt, trying to recover automatically")
+            self.serial.write(b"\x03")  # CTRL+C
+            self.serial.write(b"\x04")  # CTRL+D
+            time.sleep(0.1)
+            self.serial.write(b"\n")  # newline to activate shell again in case we closed it with CTRL-D
 
         if line != "":
             self.parseLine(line)
