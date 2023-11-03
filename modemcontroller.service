@@ -1,11 +1,13 @@
 [Unit]
 Description=modemcontroller
-After=network.target
+After=network-online.target
+StartLimitIntervalSec=0
 
 [Service]
 Environment=PYTHONUNBUFFERED=1
 ExecStart=/usr/bin/env python3 /home/dsl-modem/modem.py
 Restart=on-failure
+RestartSec=10s
 RuntimeDirectory=dsl-modem
 RuntimeDirectoryPreserve=yes
 User=dsl-modem
