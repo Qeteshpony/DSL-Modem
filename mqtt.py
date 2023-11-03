@@ -25,9 +25,13 @@ class Client:
         self.history = {}
 
     def connect(self):
-        self.mqtt.connect(SERVER, PORT)
-        self.mqtt.will_set(self.basetopic + "LWT", "offline", retain=True)
-        self.mqtt.loop_start()
+        try:
+            self.mqtt.connect(SERVER, PORT)
+        except TimeoutError:
+            pass
+        else:
+            self.mqtt.will_set(self.basetopic + "LWT", "offline", retain=True)
+            self.mqtt.loop_start()
 
     def disconnect(self):
         self.publish("LWT", "offline", retain=True)
