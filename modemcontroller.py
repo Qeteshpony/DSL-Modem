@@ -177,7 +177,7 @@ class DSLModem:
                         self.mqtt.publish(uid + "/raw", str(self.modemData.get(uid)))
                     else:
                         sensorvalue = str(self.modemData.get(uid))
-                    self.mqtt.publish(uid, sensorvalue)
+                    self.mqtt.publish(uid, sensorvalue, retain=True)
                     logging.debug(f'{sensor.get("name")}: {sensorvalue}')
                     return
 
