@@ -10,6 +10,7 @@ Restart=on-failure
 RestartSec=10s
 RuntimeDirectory=dsl-modem
 RuntimeDirectoryPreserve=yes
+WorkingDirectory=/run/dsl-modem
 User=dsl-modem
 Group=dsl-modem
 SyslogIdentifier=dsl-modem
