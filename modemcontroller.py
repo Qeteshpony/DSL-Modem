@@ -31,13 +31,22 @@ def getValueFromString(line: str, returntype: type):
     """
     if returntype is int:
         match = re_int.match(line)
-        return int(match[1])
+        if match is not None:
+            return int(match[1])
+        else:
+            return 0
     elif returntype is hex:
         match = re_hex.match(line)
-        return int(match[1], 16)
+        if match is not None:
+            return int(match[1], 16)
+        else:
+            return 0
     elif returntype is float:
         match = re_float.match(line)
-        return float(match[1])
+        if match is not None:
+            return float(match[1])
+        else:
+            return 0.0
     elif returntype is str:
         _, value = line.split(":", maxsplit=1)
         return value.strip()
@@ -204,6 +213,8 @@ class DSLModem:
                 self.nextDataRequest = time.time() + 2
 
         except TypeError as e:
+            logging.error(e)
+        except Exception as e:
             logging.error(e)
 
     def close(self) -> None:
