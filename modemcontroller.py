@@ -187,6 +187,8 @@ class DSLModem:
                     else:
                         sensorvalue = str(self.modemData.get(uid))
                     self.mqtt.publish(uid, sensorvalue, retain=True)
+                    with open(self.rundir + uid + ".txt", "w") as f:
+                        f.write(sensorvalue + "\n")
                     logging.debug(f'{sensor.get("name")}: {sensorvalue}')
                     return
 
