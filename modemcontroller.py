@@ -220,7 +220,7 @@ class DSLModem:
             logging.error(e)
 
     def close(self) -> None:
-        logging.info("CLosing connections...")
+        logging.info("Closing connections...")
         if self.displayTimer:
             self.displayTimer.cancel()
         self.LEDThread.stop()
