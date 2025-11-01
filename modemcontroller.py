@@ -57,7 +57,10 @@ class DSLModem:
     def __init__(self, serialport: str, baudrate: int = 115200, timeout: float = 1, rundir: str = None):
         self.LEDThread = None
         self.ethpacketcounter: int = 0
-        self.serial = serial.Serial(serialport, baudrate, timeout=timeout)
+        self.serialport = serialport
+        self.baudrate = baudrate
+        self.timeout = timeout
+        self.serial = serial.Serial(self.serialport, self.baudrate, timeout=self.timeout)
         self.rundir = rundir
         self.modemData = {}
         self.trainingmode: int = 0
@@ -99,11 +102,17 @@ class DSLModem:
         while True:
             self.loop()
 
+    def resetSerial(self) -> None:
+        if self.serial.is_open:
+            self.serial.close()
+        self.serial = serial.Serial(self.serialport, self.baudrate, timeout=self.timeout)
+
     def loop(self) -> None:
         if not self.modemAvailable:
             if self.lastAvailabilityCheck + 5 < time.time():
                 logging.debug("Send Availability Check...")
                 self.lastAvailabilityCheck = time.time()
+                self.resetSerial()
                 self.serial.write(b"\n")  # Send newline to activate prompt
 
         line = ""
@@ -287,7 +296,7 @@ class DSLModem:
         else:
             self.display.printlines("Modem", "unavailable", align="center")
 
-    def next_page(self, reset = False) -> None:
+    def next_page(self, reset=False) -> None:
         if self.displayTimer:
             self.displayTimer.cancel()
         if reset:
