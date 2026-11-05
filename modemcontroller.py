@@ -106,7 +106,18 @@ class DSLModem:
     def resetSerial(self) -> None:
         if self.serial.is_open:
             self.serial.close()
-        self.serial = serial.Serial(self.serialport, self.baudrate, timeout=self.timeout)
+        try:
+            self.serial = serial.Serial(self.serialport, self.baudrate, timeout=self.timeout)
+        except serial.SerialException as e:
+            logging.error(f"Failed to open serial port {self.serialport} with error: {e}")
+            time.sleep(1)
+
+    def serialWrite(self, data: bytes) -> None:
+        try:
+            self.serial.write(data)
+        except serial.SerialException as e:
+            logging.error(f"Serial write failed: {e}")
+            self.modemAvailable = False
 
     def loop(self) -> None:
         if not self.modemAvailable:
@@ -114,7 +125,7 @@ class DSLModem:
                 logging.debug("Send Availability Check...")
                 self.lastAvailabilityCheck = time.time()
                 self.resetSerial()
-                self.serial.write(b"\x11\n")  # XON to resume stopped output, newline to activate prompt
+                self.serialWrite(b"\x11\n")  # XON to resume stopped output, newline to activate prompt
 
         line = ""
         try:
@@ -130,7 +141,7 @@ class DSLModem:
             if not self.modemAvailable:
                 logging.info("Serial connection to modem established")
                 self.modemAvailable = True
-                self.serial.write(COMMAND_SET_ROUTE)
+                self.serialWrite(COMMAND_SET_ROUTE)
                 self.mqtt.connect()
             if line.startswith("root@SpeedportW925V:/# libmapi_dsl_cli"):
                 logging.debug("Collecting DSL data")
@@ -144,16 +155,16 @@ class DSLModem:
                     self.writeCollectedData()
                     if self.mqtt.swversion == "":
                         logging.info("Requesting Software Version from modem")
-                        self.serial.write(COMMAND_GET_SW_VERSION)
+                        self.serialWrite(COMMAND_GET_SW_VERSION)
                 line = line[len("root@SpeedportW925V:/#"):-1].strip()
 
         if line.startswith(">"):
             # we're stuck in a prompt we dont want to be in. Try to recover...
             logging.error("Got '>' prompt, trying to recover automatically")
-            self.serial.write(b"\x03")  # CTRL+C
-            self.serial.write(b"\x04")  # CTRL+D
+            self.serialWrite(b"\x03")  # CTRL+C
+            self.serialWrite(b"\x04")  # CTRL+D
             time.sleep(0.1)
-            self.serial.write(b"\n")  # newline to activate shell again in case we closed it with CTRL-D
+            self.serialWrite(b"\n")  # newline to activate shell again in case we closed it with CTRL-D
 
         if line != "":
             self.parseLine(line)
@@ -248,9 +259,9 @@ class DSLModem:
             self.mqtt.connect()
 
         self.nextDataRequest = time.time() + self.DataRequestTimer
-        self.serial.write(COMMAND_UPTIME)
-        self.serial.write(COMMAND_ETH_DATA)
-        self.serial.write(COMMAND_DSL_DATA)
+        self.serialWrite(COMMAND_UPTIME)
+        self.serialWrite(COMMAND_ETH_DATA)
+        self.serialWrite(COMMAND_DSL_DATA)
 
     def writeCollectedData(self) -> None:
         with open(self.rundir + "collectedData.txt", "w") as f:
