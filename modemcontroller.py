@@ -127,7 +127,7 @@ class DSLModem:
                 self.serialWrite(b"\x11\n")  # XON to resume stopped output, newline to activate prompt
 
         line = ""
-        if not self.serial.isOpen():
+        if not self.serial.is_open:
             time.sleep(1)
         else:
             try:
