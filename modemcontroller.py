@@ -387,6 +387,7 @@ class DisplayButton:
 class LEDThread(threading.Thread):
     def __init__(self, led: 'ETHLEDs'):
         threading.Thread.__init__(self)
+        self.daemon = True
         self.name = "LEDThread"
         self.LED = led
         self.ethpacketcounter = 0
