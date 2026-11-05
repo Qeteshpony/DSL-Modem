@@ -86,6 +86,7 @@ class DSLModem:
         self.displaybutton = DisplayButton(22, self)
 
         # initialize display
+        self.displayLock = threading.RLock()
         self.page = 0
         self.display = LCD()
         self.updateDisplay()
@@ -257,6 +258,13 @@ class DSLModem:
         self.updateDisplay()
 
     def updateDisplay(self) -> None:
+        with self.displayLock:
+            try:
+                self._updateDisplay()
+            except OSError as e:
+                logging.error(f"Display error: {e}")
+
+    def _updateDisplay(self) -> None:
         if self.modemButtonPressed:
             self.display.backlight.RGB(255, 0, 255)
         elif self.modemReboot:
