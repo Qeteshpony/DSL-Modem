@@ -27,7 +27,7 @@ class Client:
     def connect(self):
         try:
             self.mqtt.connect(SERVER, PORT)
-        except TimeoutError:
+        except OSError:
             pass
         else:
             self.mqtt.will_set(self.basetopic + "LWT", "offline", retain=True)
