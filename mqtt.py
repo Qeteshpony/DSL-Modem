@@ -23,20 +23,21 @@ class Client:
         self.basetopic = IDENTIFIER + "/"
         self.swversion = ""
         self.history = {}
+        self.running = False
 
     def connect(self):
-        try:
-            self.mqtt.connect(SERVER, PORT)
-        except OSError:
-            pass
-        else:
-            self.mqtt.will_set(self.basetopic + "LWT", "offline", retain=True)
-            self.mqtt.loop_start()
+        if self.running:
+            return
+        self.mqtt.will_set(self.basetopic + "LWT", "offline", retain=True)
+        self.mqtt.connect_async(SERVER, PORT)
+        self.mqtt.loop_start()
+        self.running = True
 
     def disconnect(self):
         self.publish("LWT", "offline", retain=True)
-        self.mqtt.loop_stop()
         self.mqtt.disconnect()
+        self.mqtt.loop_stop()
+        self.running = False
 
     def on_connect(self, *_args, **_kwargs):
         self.connected = True
@@ -60,7 +61,6 @@ class Client:
             if message != self.history.get(topic).get("message") or self.history.get(topic).get("timestamp") + self.sendAgain < time.time():
                 self.mqtt.publish(topic, message, retain=retain)
                 self.history[topic] = {"message": message, "timestamp": time.time()}
-
 
     def hass_discovery(self):
         logging.info("Sending HASS Discovery Messages...")
