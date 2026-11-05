@@ -113,7 +113,7 @@ class DSLModem:
                 logging.debug("Send Availability Check...")
                 self.lastAvailabilityCheck = time.time()
                 self.resetSerial()
-                self.serial.write(b"\n")  # Send newline to activate prompt
+                self.serial.write(b"\x11\n")  # XON to resume stopped output, newline to activate prompt
 
         line = ""
         try:
