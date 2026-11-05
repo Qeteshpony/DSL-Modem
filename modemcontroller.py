@@ -110,7 +110,6 @@ class DSLModem:
             self.serial = serial.Serial(self.serialport, self.baudrate, timeout=self.timeout)
         except serial.SerialException as e:
             logging.error(f"Failed to open serial port {self.serialport} with error: {e}")
-            time.sleep(1)
 
     def serialWrite(self, data: bytes) -> None:
         try:
@@ -128,12 +127,15 @@ class DSLModem:
                 self.serialWrite(b"\x11\n")  # XON to resume stopped output, newline to activate prompt
 
         line = ""
-        try:
-            line = self.serial.readline().strip().decode()
-        except UnicodeDecodeError:
-            pass
-        except Exception as e:
-            logging.error(e)
+        if not self.serial.isOpen():
+            time.sleep(1)
+        else:
+            try:
+                line = self.serial.readline().strip().decode()
+            except UnicodeDecodeError:
+                pass
+            except Exception as e:
+                logging.error(e)
 
         if line.startswith("root@SpeedportW925V"):
             self.modemReboot = False
